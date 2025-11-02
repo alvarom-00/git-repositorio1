@@ -1,0 +1,178 @@
+package es.unileon.prg1.sieteymedia;
+
+public class Card {
+    
+    private Palo palo;
+    private int number;
+
+
+    //private static final int NUM_CARTAS = 13; //Limita que solamente se pueda lleagr a 13 en un int
+
+
+
+    public Card() {
+        this.number = 1;
+        this.palo = Palo.OROS;
+        }
+
+
+    public Card(int number, int palo) throws SieteymediaException {
+    
+
+        if (number < 1 || number > 10) {
+        throw new SieteymediaException("Número de carta inválido: " + number + ", debe ser entre 1 y 10");
+    }
+
+
+        this.number = number;
+
+        
+        switch (palo) {
+            case 0:
+                this.palo = Palo.OROS;
+                break;
+            case 1:
+                this.palo = Palo.COPAS;
+                break;
+
+            case 2:
+                this.palo = Palo.ESPADAS;
+                break;
+
+            case 3:
+                this.palo = Palo.BASTOS;
+                
+                break;
+        
+            default: 
+            throw new SieteymediaException("Valor de palo inválido: " + palo);
+        }
+    }
+
+
+    public int getNumber() {
+        return this.number;
+    }
+
+
+    public Palo getPalo() {
+        return this.palo;
+    }
+
+
+    public Card next() throws SieteymediaException {
+    int nextNumber = this.number;
+    int nextPalo = this.palo.ordinal();
+
+    if (this.number < 10) {
+        nextNumber++;
+    } else {
+        nextNumber = 1;
+        nextPalo++;
+        if (nextPalo > 3) {
+            nextPalo = 0; // vuelve a OROS después de BASTOS que es el ultimo palo
+        }
+    }
+
+    return new Card(nextNumber, nextPalo);
+}
+
+
+    public double getPoints() {
+        if (this.number >= 1 && this.number <= 7) {
+        return this.number;
+    } else {
+        return 0.5;
+    }
+    }
+
+
+    public int getPositionFor() {
+    int base;
+    switch (this.palo) {
+        case OROS:
+            base = 0;
+            break;
+        case COPAS:
+            base = 10;
+            break;
+        case ESPADAS:
+            base = 20;
+            break;
+        case BASTOS:
+            base = 30;
+            break;
+        default:
+            base = 0; 
+    }
+    return base + this.number;
+}
+
+
+
+    public int getPositionWhile() {
+        return getPositionFor() - 1;
+    }
+
+
+    public String toStringAll() throws SieteymediaException {
+    StringBuilder cartas = new StringBuilder();
+    cartas.append("Cartas del mazo:\n");
+
+    Card carta = new Card(1, 0); // empezamos siempre en el as de OROS
+    for (int i = 0; i < 40; i++) {
+        cartas.append(carta.toString()).append("\n");
+        carta = carta.next();
+    }
+
+    return cartas.toString();
+}
+
+
+    public String toStringUpToThis() throws SieteymediaException {
+    StringBuilder resultado = new StringBuilder();
+    resultado.append("Cartas del mazo hasta ").append(this.toString()).append(":\n");
+
+    Card carta = new Card(1, 0); // As de OROS
+    while (!carta.equals(this)) {
+        resultado.append(carta.toString()).append("\n");
+        carta = carta.next();
+    }
+    
+    return resultado.toString();
+}
+
+
+
+
+
+
+
+
+
+    @Override // sobrescribimos el metodo que ya existe 
+    public boolean equals(Object obj) {
+    if (this == obj) {
+        return true;
+    }
+    if (obj == null ) {
+        return false;
+    }
+    Card other = (Card) obj;
+    return this.number == other.number && this.palo == other.palo;
+}
+
+    @Override
+    public String toString() {
+        switch (this.number) {
+            case 1: return "As de " + this.palo;
+            case 8: return "Sota de " + this.palo;
+            case 9: return "Caballo de " + this.palo;
+            case 10: return "Rey de " + this.palo;
+            default: return this.number + " de " + this.palo;
+        }
+    }
+
+
+
+}
