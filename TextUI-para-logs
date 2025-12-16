@@ -5,53 +5,69 @@ import org.apache.logging.log4j.Logger;
 import java.util.Scanner;
 
 /**
- * Interfaz de usuario en modo texto.
+ * Interfaz de usuario en modo texto para el juego de Siete y Media.
  */
 public class TextUI {
 
-    private final static Logger logger = LogManager.getLogger(TextUI.class);
-    private SieteymediaGame game;
-    private Scanner scanner;
+  /** Logger de la clase. */
+  private final static Logger logger = LogManager.getLogger(TextUI.class);
 
-    public TextUI(SieteymediaGame game) {
-        this.game = game;
-        this.scanner = new Scanner(System.in);
-    }
+  /**
+   * Atributo que representa el juego de Siete y Media.
+   */
+  private SieteymediaGame game;
 
-    /**
-     * Inicia el bucle del juego y registra la interacción del usuario.
-     */
-    public void init() {
-        try {
-            boolean end = false;
-            while (!end) {
-                System.out.println(game.toString());
-                System.out.print("¿Desea (o)tra carta o (p)lantarse?: ");
-                String opcion = scanner.nextLine().toLowerCase();
-                
-                // LOG: Registro de la opción elegida (Imagen 2)
-                logger.info("El usuario ha introducido la opcion: " + opcion);
+  /**
+   * Constructor de la clase.
+   *
+   * @param game Juego de Siete y Media
+   */
+  public TextUI(SieteymediaGame game) {
+    this.game = game;
+  }
 
-                if (opcion.equals("o")) {
-                    game.playerPlays();
-                    if (game.getPlayerPoints() > 7.5) {
-                        end = true;
-                    }
-                } else if (opcion.equals("p")) {
-                    game.stick();
-                    end = true;
-                }
-            }
+  /**
+   * Inicia la interfaz de usuario en modo texto.
+   */
+  public void init() {
+    Scanner scanner = new Scanner(System.in);
+    System.out.println("Bienvenido al juego de las Siete y Media, " + game.getPlayer().getName()); //
 
-            // LOG: Registro del resultado final (Imagen 2)
-            if (game.playerWins()) {
-                logger.info("El jugador " + game.getPlayer().getName() + " gana la partida con " + game.getPlayerPoints() + " puntos");
-            } else {
-                logger.info("La banca gana la partida con " + game.getHousePoints() + " puntos");
-            }
+    try {
+      boolean terminar = false;
+      while (!terminar) {
+        System.out.println(game.toString());
+        System.out.println("Siguiente jugada: P (plantarse), O (otra carta), S (salir)"); //
+        String opcion = scanner.nextLine().toLowerCase();
 
-        } catch (SieteymediaException e) {
-            logger.error("Error en el juego: " + e.getMessage());
+        // Registro de la opción en el log acumulativo
+        logger.info("El usuario ha introducido la opcion: " + opcion); //
+
+        if (opcion.equals("s")) {
+          terminar = true;
+          System.out.println("Saliendo...");
+        } else if (opcion.equals("o")) {
+          if (!game.anotherCard()) {
+            terminar = true;
+          }
+        } else if (opcion.equals("p")) {
+          game.stick();
+          terminar = true;
+        } else {
+          System.out.println("Opción no válida.");
         }
+      }
+
+      // Registro de resultados finales según las imágenes
+      if (game.playerWins()) {
+        logger.info("El jugador " + game.getPlayer().getName() + " gana la partida con " + game.getPlayerPoints() + " puntos"); //
+      } else if (game.houseWins()) {
+        logger.info("La banca gana la partida con " + game.getHousePoints() + " puntos"); //
+      }
+
+    } catch (SieteymediaException e) {
+      logger.error("Error: " + e.getMessage());
     }
+  }
+
 }
