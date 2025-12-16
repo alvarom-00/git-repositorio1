@@ -1,0 +1,90 @@
+package es.unileon.prg1.sieteymedia;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Clase que representa el juego de las Siete y Media.
+ */
+public class SieteymediaGame {
+
+    /** Logger de la clase para registrar eventos del juego. */
+    private final static Logger logger = LogManager.getLogger(SieteymediaGame.class);
+
+    private Player player;
+    private Player house;
+    private Deck deck;
+    private double playerPoints;
+    private double housePoints;
+
+    public SieteymediaGame(String name, Deck deck) {
+        this.player = new Player(name);
+        this.house = new Player("Banca");
+        this.deck = deck;
+        this.playerPoints = 0.0;
+        this.housePoints = 0.0;
+        // Registro del inicio de partida (Imagen 1 y 2)
+        logger.info("Nueva partida iniciada para el jugador " + name);
+    }
+
+    public SieteymediaGame(String name) {
+        this(name, new Deck());
+    }
+
+    public Player getPlayer() { return this.player; }
+    public double getPlayerPoints() { return this.playerPoints; }
+    public double getHousePoints() { return this.housePoints; }
+
+    /**
+     * El jugador roba una carta y se registra en el log.
+     */
+    public void playerPlays() throws SieteymediaException {
+        Card card = deck.getCard();
+        playerPoints += card.getPoints();
+        logger.info("El jugador " + player.getName() + " saca la carta " + card.toString());
+        
+        if (playerPoints > 7.5) {
+            logger.info("El jugador " + player.getName() + " se pasa con " + playerPoints + " puntos");
+        }
+    }
+
+    /**
+     * La banca roba una carta y se registra en el log.
+     */
+    public void housePlays() throws SieteymediaException {
+        Card card = deck.getCard();
+        housePoints += card.getPoints();
+        logger.info("La banca saca la carta " + card.toString());
+        
+        if (housePoints > 7.5) {
+            logger.info("La banca se pasa con " + housePoints + " puntos");
+        }
+    }
+
+    public void stick() throws SieteymediaException {
+        logger.info("La banca se planta con " + (housePoints == 7.5 ? "siete y media" : housePoints + " puntos"));
+        while (housePoints <= playerPoints && housePoints < 7.5) {
+            housePlays();
+        }
+    }
+
+    public boolean playerWins() {
+        if (playerPoints > 7.5) return false;
+        if (housePoints > 7.5) return true;
+        return playerPoints > housePoints;
+    }
+
+    public boolean houseWins() {
+        if (housePoints > 7.5) return false;
+        if (playerPoints > 7.5) return true;
+        return housePoints > playerPoints;
+    }
+
+    @Override
+    public String toString() {
+        return "----------\n"
+            + "Total " + player.getName() + " = " + playerPoints + " puntos\n"
+            + "Total Banca = " + housePoints + " puntos\n"
+            + "----------\n";
+    }
+}
