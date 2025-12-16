@@ -1,0 +1,57 @@
+package es.unileon.prg1.sieteymedia;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import java.util.Scanner;
+
+/**
+ * Interfaz de usuario en modo texto.
+ */
+public class TextUI {
+
+    private final static Logger logger = LogManager.getLogger(TextUI.class);
+    private SieteymediaGame game;
+    private Scanner scanner;
+
+    public TextUI(SieteymediaGame game) {
+        this.game = game;
+        this.scanner = new Scanner(System.in);
+    }
+
+    /**
+     * Inicia el bucle del juego y registra la interacción del usuario.
+     */
+    public void init() {
+        try {
+            boolean end = false;
+            while (!end) {
+                System.out.println(game.toString());
+                System.out.print("¿Desea (o)tra carta o (p)lantarse?: ");
+                String opcion = scanner.nextLine().toLowerCase();
+                
+                // LOG: Registro de la opción elegida (Imagen 2)
+                logger.info("El usuario ha introducido la opcion: " + opcion);
+
+                if (opcion.equals("o")) {
+                    game.playerPlays();
+                    if (game.getPlayerPoints() > 7.5) {
+                        end = true;
+                    }
+                } else if (opcion.equals("p")) {
+                    game.stick();
+                    end = true;
+                }
+            }
+
+            // LOG: Registro del resultado final (Imagen 2)
+            if (game.playerWins()) {
+                logger.info("El jugador " + game.getPlayer().getName() + " gana la partida con " + game.getPlayerPoints() + " puntos");
+            } else {
+                logger.info("La banca gana la partida con " + game.getHousePoints() + " puntos");
+            }
+
+        } catch (SieteymediaException e) {
+            logger.error("Error en el juego: " + e.getMessage());
+        }
+    }
+}
