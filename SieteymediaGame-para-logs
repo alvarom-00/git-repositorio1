@@ -5,86 +5,225 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * Clase que representa el juego de las Siete y Media.
+ * Controla la lógica del juego entre un jugador y la banca,
+ * así como el manejo de la baraja y las puntuaciones.
+ *
+ * @author
  */
 public class SieteymediaGame {
 
-    /** Logger de la clase para registrar eventos del juego. */
-    private final static Logger logger = LogManager.getLogger(SieteymediaGame.class);
+  /** Logger de la clase. */
+  private final static Logger logger = LogManager.getLogger(SieteymediaGame.class);
 
-    private Player player;
-    private Player house;
-    private Deck deck;
-    private double playerPoints;
-    private double housePoints;
+  /**
+   * Jugador humano.
+   */
+  private Player player;
 
-    public SieteymediaGame(String name, Deck deck) {
-        this.player = new Player(name);
-        this.house = new Player("Banca");
-        this.deck = deck;
-        this.playerPoints = 0.0;
-        this.housePoints = 0.0;
-        // Registro del inicio de partida (Imagen 1 y 2)
-        logger.info("Nueva partida iniciada para el jugador " + name);
+  /**
+   * Jugador que representa a la banca.
+   */
+  private Player house;
+
+  /**
+   * Baraja de cartas utilizada en el juego.
+   */
+  private Deck deck;
+
+  /**
+   * Puntuación actual del jugador.
+   */
+  private double playerPoints;
+
+  /**
+   * Puntuación actual de la banca.
+   */
+  private double housePoints;
+
+  /**
+   * Constructor del juego con nombre de jugador y baraja.
+   *
+   * @param name nombre del jugador
+   * @param deck baraja de cartas a utilizar
+   */
+  public SieteymediaGame(String name, Deck deck) {
+    this.player = new Player(name);
+    this.house = new Player("Banca");
+    this.deck = deck;
+    this.playerPoints = 0.0;
+    this.housePoints = 0.0;
+    logger.info("Nueva partida iniciada para el jugador " + name); //
+  }
+
+  /**
+   * Constructor del juego con nombre de jugador.
+   * Se crea una baraja nueva por defecto.
+   *
+   * @param name nombre del jugador
+   */
+  public SieteymediaGame(String name) {
+    this(name, new Deck());
+  }
+
+  /**
+   * Devuelve el jugador humano.
+   *
+   * @return jugador
+   */
+  public Player getPlayer() {
+    return this.player;
+  }
+
+  /**
+   * Devuelve la puntuación del jugador.
+   *
+   * @return puntos del jugador
+   */
+  public double getPlayerPoints() {
+    return this.playerPoints;
+  }
+
+  /**
+   * Devuelve la puntuación de la banca.
+   *
+   * @return puntos de la banca
+   */
+  public double getHousePoints() {
+    return this.housePoints;
+  }
+
+  /**
+   * El jugador roba una carta.
+   * La banca roba una carta por turno si el jugador no se pasa
+   * y su puntuación es menor que 7.5.
+   *
+   * @return {@code true} si el jugador puede seguir jugando,
+   * {@code false} si se pasa
+   * @throws SieteymediaException si ocurre un error al robar carta
+   */
+  public boolean anotherCard() throws SieteymediaException {
+
+    // El jugador roba siempre
+    Card playerCard = deck.getCard();
+    playerPoints += playerCard.getPoints();
+    logger.info("El jugador " + player.getName() + " saca la carta " + playerCard.toString()); //
+
+    // Si el jugador se pasa, la banca no roba
+    if (playerPoints > 7.5) {
+      logger.info("El jugador " + player.getName() + " se pasa con " + playerPoints + " puntos"); //
+      return false;
     }
 
-    public SieteymediaGame(String name) {
-        this(name, new Deck());
+    // La banca roba si tiene menos de 7.5
+    if (housePoints < 7.5) {
+      Card houseCard = deck.getCard();
+      logger.info("La banca saca la carta " + houseCard.toString()); //
+
+      if (playerPoints == 7.5 && houseCard.getPoints() == 0.5) {
+        // Caso especial: figura vale 11.5
+        housePoints += 11.5;
+      } else {
+        housePoints += houseCard.getPoints();
+      }
+      
+      if (housePoints > 7.5) {
+          logger.info("La banca se pasa con " + housePoints + " puntos"); //
+      }
     }
 
-    public Player getPlayer() { return this.player; }
-    public double getPlayerPoints() { return this.playerPoints; }
-    public double getHousePoints() { return this.housePoints; }
+    return playerPoints < 7.5;
+  }
 
-    /**
-     * El jugador roba una carta y se registra en el log.
-     */
-    public void playerPlays() throws SieteymediaException {
-        Card card = deck.getCard();
-        playerPoints += card.getPoints();
-        logger.info("El jugador " + player.getName() + " saca la carta " + card.toString());
-        
-        if (playerPoints > 7.5) {
-            logger.info("El jugador " + player.getName() + " se pasa con " + playerPoints + " puntos");
-        }
+  /**
+   * El jugador se planta y la banca roba cartas
+   * hasta superar al jugador o pasarse.
+   *
+   * @throws SieteymediaException si ocurre un error al robar carta
+   */
+  public void stick() throws SieteymediaException {
+    while (housePoints <= playerPoints && housePoints < 7.5) {
+      Card houseCard = deck.getCard();
+      logger.info("La banca saca la carta " + houseCard.toString()); //
+      housePoints += houseCard.getPoints();
     }
+    
+    if (housePoints > 7.5) {
+        logger.info("La banca se pasa con " + housePoints + " puntos"); //
+    } else {
+        String puntosStr = (housePoints == 7.5) ? "siete y media" : housePoints + " puntos";
+        logger.info("La banca se planta con " + puntosStr); //
+    }
+  }
 
-    /**
-     * La banca roba una carta y se registra en el log.
-     */
-    public void housePlays() throws SieteymediaException {
-        Card card = deck.getCard();
-        housePoints += card.getPoints();
-        logger.info("La banca saca la carta " + card.toString());
-        
-        if (housePoints > 7.5) {
-            logger.info("La banca se pasa con " + housePoints + " puntos");
-        }
-    }
+  /**
+   * El jugador roba una carta.
+   *
+   * @throws SieteymediaException si ocurre un error al robar carta
+   */
+  public void playerPlays() throws SieteymediaException {
+    Card card = deck.getCard();
+    playerPoints += card.getPoints();
+    logger.info("El jugador " + player.getName() + " saca la carta " + card.toString());
+  }
 
-    public void stick() throws SieteymediaException {
-        logger.info("La banca se planta con " + (housePoints == 7.5 ? "siete y media" : housePoints + " puntos"));
-        while (housePoints <= playerPoints && housePoints < 7.5) {
-            housePlays();
-        }
-    }
+  /**
+   * La banca roba una carta.
+   *
+   * @throws SieteymediaException si ocurre un error al robar carta
+   */
+  public void housePlays() throws SieteymediaException {
+    Card card = deck.getCard();
+    housePoints += card.getPoints();
+    logger.info("La banca saca la carta " + card.toString());
+  }
 
-    public boolean playerWins() {
-        if (playerPoints > 7.5) return false;
-        if (housePoints > 7.5) return true;
-        return playerPoints > housePoints;
+  /**
+   * Indica si el jugador gana la partida.
+   *
+   * @return {@code true} si el jugador gana,
+   * {@code false} en caso contrario
+   */
+  public boolean playerWins() {
+    if (playerPoints > 7.5) {
+      return false;
     }
+    if (housePoints > 7.5) {
+      return true;
+    }
+    return playerPoints > housePoints;
+  }
 
-    public boolean houseWins() {
-        if (housePoints > 7.5) return false;
-        if (playerPoints > 7.5) return true;
-        return housePoints > playerPoints;
+  /**
+   * Indica si la banca gana la partida.
+   *
+   * @return {@code true} si la banca gana,
+   * {@code false} en caso contrario
+   */
+  public boolean houseWins() {
+    if (housePoints > 7.5) {
+      return false;
     }
+    if (playerPoints > 7.5) {
+      return true;
+    }
+    return housePoints > playerPoints;
+  }
 
-    @Override
-    public String toString() {
-        return "----------\n"
-            + "Total " + player.getName() + " = " + playerPoints + " puntos\n"
-            + "Total Banca = " + housePoints + " puntos\n"
-            + "----------\n";
-    }
+  /**
+   * Devuelve una representación en texto del estado del juego.
+   *
+   * @return cadena con la información del juego
+   */
+  @Override
+  public String toString() {
+    return "----------\n"
+        + "Cartas de " + player.getName() + ":\n"
+        + "(Lista de cartas)\n"
+        + "Total = " + playerPoints + " puntos\n"
+        + "----------\n"
+        + "Cartas de la banca:\n"
+        + "(Lista de cartas)\n"
+        + "Total = " + housePoints + " puntos\n"
+        + "----------\n";
+  }
 }
