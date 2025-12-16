@@ -1,0 +1,1 @@
+java -cp .:classes/:lib/log4j-api-2.5.jar:lib/log4j-core-2.5.jar es.unileon.prg1.sieteymedia.MainSieteymedia Pepe
