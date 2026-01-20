@@ -1,0 +1,66 @@
+/* RESULTADOS  */
+
+public boolean playerWins() {
+    // Si el jugador se pasa, pierde siempre
+    if (playerPoints > 7.5) {
+        return false;
+    }
+    // Si el jugador no se ha pasado y la banca sí, gana el jugador
+    if (housePoints > 7.5) {
+        return true;
+    }
+    // En caso de que ninguno se pase, el jugador solo gana si tiene MÁS puntos que la banca
+    // Si hay empate, la banca gana (por eso usamos > y no >=)
+    return playerPoints > housePoints;
+}
+
+public boolean houseWins() {
+    // Si la banca se pasa, pierde siempre
+    if (housePoints > 7.5) {
+        return false;
+    }
+    // Si la banca no se ha pasado y el jugador sí, gana la banca
+    if (playerPoints > 7.5) {
+        return true;
+    }
+    // La banca gana si tiene los mismos o más puntos que el jugador (sin pasarse)
+    return housePoints >= playerPoints;
+}
+
+
+
+
+
+
+
+
+
+public boolean anotherCard() throws SieteymediaException {
+    // 1. Roba jugador
+    Card playerCard = deck.getCard();
+    playerPoints += playerCard.getPoints();
+
+    // 2. Si el jugador se pasa, pierde vida y termina
+    if (playerPoints > 7.5) {
+        player.loseLife(); // Eliminamos el if (lives > 0) para que la lógica de Player decida
+        return false;
+    }
+
+    // 3. La banca roba si va perdiendo
+    if (housePoints <= playerPoints && housePoints < 7.5) {
+        Card houseCard = deck.getCard();
+        housePoints += houseCard.getPoints();
+    }
+
+    // 4. Si el jugador llega a 7.5 o la banca iguala/supera, termina la ronda
+    if (playerPoints == 7.5 || housePoints >= playerPoints) {
+        // La banca intenta superar al jugador si este tiene 7.5
+        while (playerPoints == 7.5 && housePoints < playerPoints && housePoints < 7.5) {
+            Card houseCard = deck.getCard();
+            housePoints += houseCard.getPoints();
+        }
+        return false; 
+    }
+
+    return true; 
+}
