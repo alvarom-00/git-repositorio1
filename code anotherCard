@@ -1,0 +1,40 @@
+public boolean anotherCard() throws SieteymediaException {
+
+    // El jugador roba siempre
+    double prevPoints = playerPoints;
+
+    while (prevPoints == playerPoints && player.getLives() >= 0) {
+      Card playerCard = deck.getCard();
+      playerPoints += playerCard.getPoints();
+      logger.info("El jugador " + player.getName() + " saca la carta " + playerCard.toString());
+
+      // Si el jugador se pasa, la banca no roba
+      if (playerPoints > 7.5 && player.getLives() > 0) {
+        logger.info("El jugador " + player.getName() + " se pasa con " + playerPoints + " puntos");
+        player.loseLife();
+        playerPoints -= playerCard.getPoints();
+
+      }
+    }
+
+    // La banca roba si tiene menos de 7.5
+    if (housePoints < 7.5) {
+      Card houseCard = deck.getCard();
+      logger.info("La banca saca la carta " + houseCard.toString()); //
+
+      if (playerPoints == 7.5 && houseCard.getPoints() == 0.5) {
+        // Caso de que la figura vale 11.5
+        housePoints += 11.5;
+      } else {
+        if (playerPoints <= 7.5) {
+          housePoints += houseCard.getPoints();
+        }
+      }
+
+      if (housePoints > 7.5) {
+        logger.info("La banca se pasa con " + housePoints + " puntos"); //
+      }
+    }
+
+    return playerPoints < 7.5;
+  }
