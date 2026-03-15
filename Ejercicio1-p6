@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>  
+
+int suma(int vector[]);
+void ini_vector(int vector[]);
+
+int main(){
+
+    int vector_elem[10];
+    int resultado;
+    int i;
+
+   
+    srand(time(NULL));  // asegura que los números sean diferentes cada vez
+
+    ini_vector(vector_elem);
+
+    resultado = suma(vector_elem);
+
+    printf("Elementos del vector:\n");
+    for(i = 0; i < 10; i++){
+        printf("%d ", vector_elem[i]);
+    }
+
+    printf("\nSuma total: %d\n", resultado);
+
+    return 0;
+}
+
+int suma(int vector[]){
+    int i;
+    int total;
+
+    total = 0;
+
+    for(i = 0; i < 10; i++){
+        total += vector[i];
+    }
+
+    return total;
+}
+
+void ini_vector(int vector[]){
+    int i;
+
+    for(i = 0; i < 10; i++){
+        vector[i] = (rand() % 10) + 1;  
+    }
+}
